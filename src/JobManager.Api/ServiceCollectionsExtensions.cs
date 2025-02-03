@@ -26,7 +26,7 @@ public static class ServiceCollectionsExtensions
         serviceCollection.AddEmailService();
         serviceCollection.AddSimpleEmailServiceClient();
         serviceCollection.ConfigureCognito();
-        serviceCollection.ConfigureOptions<VideoReceivedSettings>();
+        serviceCollection.ConfigureVideoReceivedQueue();
     }
     
     public static void ConfigureHealthCheck(this IServiceCollection services)
