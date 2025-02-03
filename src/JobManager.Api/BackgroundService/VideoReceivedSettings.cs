@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using JobManager.Cognito;
 using Microsoft.Extensions.Options;
 
 namespace JobManager.Api.BackgroundService;
@@ -18,5 +17,14 @@ public class VideoReceivedSettingsSetup(IConfiguration configuration) : IConfigu
         configuration
             .GetSection(nameof(VideoReceivedSettings))
             .Bind(options);
+    }
+}
+
+[ExcludeFromCodeCoverage]
+public static class ServiceExtensions
+{
+    public static void ConfigureVideoReceivedQueue(this IServiceCollection services)
+    {
+        services.ConfigureOptions<VideoReceivedSettingsSetup>();
     }
 }
