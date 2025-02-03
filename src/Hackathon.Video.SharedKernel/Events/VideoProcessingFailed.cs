@@ -1,3 +1,3 @@
 namespace Hackathon.Video.SharedKernel.Events;
 
-public record VideoProcessingFailed(string UserId, string JobId, string Message);
+public record VideoProcessingFailed(Guid UserId, Guid JobId, string Message);

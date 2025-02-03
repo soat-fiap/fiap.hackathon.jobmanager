@@ -28,7 +28,7 @@ public class JobRepository : IJobRepository
         await _context.SaveAsync(job);
     }
 
-    public async Task<IReadOnlyList<Job>> GetJobsAsync(string userId)
+    public async Task<IReadOnlyList<Job>> GetJobsAsync(Guid userId)
     {
         var conditions = new List<ScanCondition>
         {
@@ -39,7 +39,7 @@ public class JobRepository : IJobRepository
         return jobs;
     }
 
-    public async Task<Job> GetJobAsync(string userId, Guid jobId)
+    public async Task<Job> GetJobAsync(Guid userId, Guid jobId)
     {
         var job = await _context.LoadAsync<Job>(userId, jobId.ToString());
         return job;

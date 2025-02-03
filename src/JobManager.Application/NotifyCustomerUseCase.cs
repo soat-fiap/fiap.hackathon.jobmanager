@@ -8,7 +8,7 @@ public class NotifyCustomerUseCase(IEmailService emailService, IUserRepository u
 {
     public async Task ExecuteAsync(NotificationMessageDto request)
     {
-        var user = await userRepository.GetUserByIdAsync(Guid.Parse(request.UserId));
+        var user = await userRepository.GetUserByIdAsync(request.UserId);
         if (user is null)
         {
             return;

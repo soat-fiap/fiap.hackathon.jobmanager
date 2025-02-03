@@ -1,9 +1,12 @@
 using System.Text.Json.Serialization;
 using Amazon.SQS;
+using Hackathon.Video.SharedKernel;
 using HealthChecks.UI.Client;
 using JobManager.Api;
 using JobManager.Api.BackgroundService;
+using JobManager.Controllers.Contracts;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Options;
 using Serilog;
 using Serilog.Events;
 

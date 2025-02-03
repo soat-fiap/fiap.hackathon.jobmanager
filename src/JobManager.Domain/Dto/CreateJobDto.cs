@@ -1,3 +1,3 @@
 namespace JobManager.Domain.Dto;
 
-public record CreateJobDto(string UserId, int SnapshotsCount);
+public record CreateJobDto(Guid UserId, int SnapshotsCount);

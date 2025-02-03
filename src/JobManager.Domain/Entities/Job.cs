@@ -4,8 +4,8 @@ namespace JobManager.Domain.Entities;
 
 public class Job
 {
-    public string Id { get; init; }
-    public string UserId { get; init; } = string.Empty;
+    public Guid Id { get; init; }
+    public Guid UserId { get; init; }
     public int Snapshots { get; init; }
 
     public string VideoPath { get; set; } = string.Empty;

@@ -17,21 +17,21 @@ public class VideoProcessingConsumers(
     public async Task Consume(ConsumeContext<VideoProcessingStarted> context)
     {
         var request =
-            new UpdateJobStatusDto(context.Message.UserId, Guid.Parse(context.Message.JobId), JobStatus.InProgress);
+            new UpdateJobStatusDto(context.Message.UserId, context.Message.JobId, JobStatus.InProgress);
         await useCase.ExecuteAsync(request);
     }
 
     public async Task Consume(ConsumeContext<VideoProcessingCompleted> context)
     {
         var request =
-            new UpdateJobStatusDto(context.Message.UserId, Guid.Parse(context.Message.JobId), JobStatus.Completed);
+            new UpdateJobStatusDto(context.Message.UserId, context.Message.JobId, JobStatus.Completed);
         await useCase.ExecuteAsync(request);
     }
 
     public async Task Consume(ConsumeContext<VideoProcessingFailed> context)
     {
         var request =
-            new UpdateJobStatusDto(context.Message.UserId, Guid.Parse(context.Message.JobId), JobStatus.Error);
+            new UpdateJobStatusDto(context.Message.UserId, context.Message.JobId, JobStatus.Error);
         await useCase.ExecuteAsync(request);
     }
 }
