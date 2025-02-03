@@ -13,7 +13,7 @@ public static class ServiceExtensions
     {
         serviceCollection.AddScoped<IUseCase<CreateJobDto, JobDto>, CreateJobUseCase>()
             .AddScoped<IUseCase<CreateJobVideoUploadUrl, string>, CreateVideoUploadUrlUseCase>()
-            .AddScoped<IUseCase<string, IReadOnlyList<JobDto>>, GetUserJobsUseCase>()
+            .AddScoped<IUseCase<Guid, IReadOnlyList<JobDto>>, GetUserJobsUseCase>()
             .AddScoped<IUseCase<UpdateJobStatusDto>, UpdateJobStatusUseCase>()
             .AddScoped<IUseCase<GetJobDetailDto, JobDto>, GetJobDetailsUseCase>()
             .AddScoped<IUseCase<NotificationMessageDto>, NotifyCustomerUseCase>();

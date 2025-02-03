@@ -11,7 +11,7 @@ public class CreateJobUseCase(IJobRepository jobManagerRepository) : IUseCase<Cr
     {
         var job = new Job()
         {
-            Id = Guid.NewGuid().ToString(),
+            Id = Guid.NewGuid(),
             UserId = request.UserId,
             Snapshots = request.SnapshotsCount
         };

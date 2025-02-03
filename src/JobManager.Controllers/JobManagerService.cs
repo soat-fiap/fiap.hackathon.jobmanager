@@ -1,28 +1,18 @@
 using Hackathon.Video.SharedKernel;
 using JobManager.Controllers.Contracts;
-using JobManager.Domain.Contracts;
 using JobManager.Domain.Dto;
 
 namespace JobManager.Controllers;
 
-public class JobManagerService : IJobManagerService
+public class JobManagerService(
+    IUseCase<CreateJobDto, JobDto> createJobUseCase,
+    IUseCase<Guid, IReadOnlyList<JobDto>> getUserJobsUseCase,
+    IUseCase<GetJobDetailDto, JobDto> getJobDetailUseCase)
+    : IJobManagerService
 {
-    private readonly IUseCase<CreateJobDto, JobDto> _createJobUseCase;
-    private readonly IUseCase<string, IReadOnlyList<JobDto>> _getUserJobsUseCase;
-    private readonly IUseCase<GetJobDetailDto, JobDto> _getJobDetailUseCase;
-
-    public JobManagerService(IUseCase<CreateJobDto, JobDto> createJobUseCase,
-        IUseCase<string, IReadOnlyList<JobDto>> getUserJobsUseCase,
-        IUseCase<GetJobDetailDto, JobDto> getJobDetailUseCase)
-    {
-        _createJobUseCase = createJobUseCase;
-        _getUserJobsUseCase = getUserJobsUseCase;
-        _getJobDetailUseCase = getJobDetailUseCase;
-    }
-
     public Task<JobDto> CreateJobAsync(CreateJobDto job)
     {
-        return _createJobUseCase.ExecuteAsync(job);
+        return createJobUseCase.ExecuteAsync(job);
     }
 
     public Task UpdateJobAsync(UpdateJobStatusDto job)
@@ -30,13 +20,13 @@ public class JobManagerService : IJobManagerService
         throw new NotImplementedException();
     }
 
-    public Task<IReadOnlyList<JobDto>> ListJobsAsync(string userId)
+    public Task<IReadOnlyList<JobDto>> ListJobsAsync(Guid userId)
     {
-        return _getUserJobsUseCase.ExecuteAsync(userId);
+        return getUserJobsUseCase.ExecuteAsync(userId);
     }
 
-    public Task<JobDto> GetOneAsync(string userId, Guid jobId)
+    public Task<JobDto> GetOneAsync(Guid userId, Guid jobId)
     {
-        return _getJobDetailUseCase.ExecuteAsync(new GetJobDetailDto(userId, jobId.ToString()));
+        return getJobDetailUseCase.ExecuteAsync(new GetJobDetailDto(userId, jobId));
     }
 }

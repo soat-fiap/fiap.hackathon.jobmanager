@@ -9,7 +9,7 @@ public static class Presenter
     {
         return new Dictionary<string, AttributeValue>
         {
-            { "UserId", new AttributeValue(job.UserId) },
+            { "UserId", new AttributeValue(job.UserId.ToString()) },
             { "Id", new AttributeValue(job.Id.ToString()) },
             {
                 "Snapshots", new AttributeValue { N = job.Snapshots.ToString() }

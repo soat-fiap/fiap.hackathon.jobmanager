@@ -37,8 +37,7 @@ public class JobController : ControllerBase
     public async Task<ActionResult> Create(
         CreateJobRequest createJobRequest, CancellationToken cancellationToken)
     {
-        var job = await _jobManagerService.CreateJobAsync(new CreateJobDto(UserId.ToString(),
-            createJobRequest.Snapshots.Value));
+        var job = await _jobManagerService.CreateJobAsync(new CreateJobDto(UserId, createJobRequest.Snapshots.Value));
         return Created("", job);
     }
 
@@ -50,7 +49,7 @@ public class JobController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<List<ListJobResponse>>> GetJobs(CancellationToken cancellationToken)
     {
-        var jobs = await _jobManagerService.ListJobsAsync(UserId.ToString());
+        var jobs = await _jobManagerService.ListJobsAsync(UserId);
 
         return Ok(jobs.ToListJobResponse());
     }
@@ -64,7 +63,7 @@ public class JobController : ControllerBase
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<ListJobResponse>> GetJob(Guid id, CancellationToken cancellationToken)
     {
-        var job = await _jobManagerService.GetOneAsync(UserId.ToString(), id);
+        var job = await _jobManagerService.GetOneAsync(UserId, id);
         return Ok(job.ToListJobResponse());
     }
 
@@ -77,7 +76,7 @@ public class JobController : ControllerBase
     [HttpGet("{id:guid}/upload-link")]
     public async Task<ActionResult> GetUploadLink(Guid id, CancellationToken cancellationToken)
     {
-        var job = await _jobManagerService.GetOneAsync(UserId.ToString(), id);
+        var job = await _jobManagerService.GetOneAsync(UserId, id);
         if (job is null)
             return NotFound();
 
@@ -87,7 +86,7 @@ public class JobController : ControllerBase
             uploadUrl = url
         });
     }
-    
+
     /// <summary>
     /// Get an download link for a specific job
     /// </summary>
@@ -97,7 +96,7 @@ public class JobController : ControllerBase
     [HttpGet("{id:guid}/download")]
     public async Task<ActionResult> GetDownloadLink(Guid id, CancellationToken cancellationToken)
     {
-        var job = await _jobManagerService.GetOneAsync(UserId.ToString(), id);
+        var job = await _jobManagerService.GetOneAsync(UserId, id);
         if (job is null)
             return NotFound();
 

@@ -2,4 +2,4 @@ using JobManager.Domain.ValueObjects;
 
 namespace JobManager.Domain.Dto;
 
-public record UpdateJobStatusDto(string UserId, Guid JobId, JobStatus Status);
+public record UpdateJobStatusDto(Guid UserId, Guid JobId, JobStatus Status);

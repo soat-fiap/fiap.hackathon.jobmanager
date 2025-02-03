@@ -37,7 +37,7 @@ public static class ServiceCollectionsExtensions
 
     private static void AddDynamoDbConnection(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddScoped<IAmazonDynamoDB>(_ => new AmazonDynamoDBClient());
+        services.AddSingleton<IAmazonDynamoDB>(_ => new AmazonDynamoDBClient());
     }
     
     private static void AddS3Connection(this IServiceCollection services)

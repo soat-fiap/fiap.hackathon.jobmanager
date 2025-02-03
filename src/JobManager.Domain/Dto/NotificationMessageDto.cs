@@ -1,3 +1,3 @@
 namespace JobManager.Domain.Dto;
 
-public record NotificationMessageDto(string UserId,  string Message);
+public record NotificationMessageDto(Guid UserId,  string Message);

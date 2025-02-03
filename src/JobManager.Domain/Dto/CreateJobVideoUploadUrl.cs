@@ -1,3 +1,3 @@
 namespace JobManager.Domain.Dto;
 
-public record CreateJobVideoUploadUrl(string UserId, Guid JobId);
+public record CreateJobVideoUploadUrl(Guid UserId, Guid JobId);

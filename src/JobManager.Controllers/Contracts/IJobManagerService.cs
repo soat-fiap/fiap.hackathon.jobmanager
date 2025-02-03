@@ -8,7 +8,7 @@ public interface IJobManagerService
     
     Task UpdateJobAsync(UpdateJobStatusDto job);
     
-    Task<IReadOnlyList<JobDto>> ListJobsAsync(string userId);
+    Task<IReadOnlyList<JobDto>> ListJobsAsync(Guid userId);
 
-    Task<JobDto> GetOneAsync(string userId, Guid jobId);
+    Task<JobDto> GetOneAsync(Guid userId, Guid jobId);
 }

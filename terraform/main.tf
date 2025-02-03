@@ -110,10 +110,22 @@ resource "aws_sqs_queue" "sqs_notificacao" {
 # CONFIGS/SECRETS
 ##############################
 
+resource "kubernetes_namespace" "fiap_jobmanager" {
+  metadata {
+    name = "fiap-jobmanager"
+  }
+}
+
+
+##############################
+# CONFIGS/SECRETS
+##############################
+
 
 resource "kubernetes_config_map_v1" "config_map_api" {
   metadata {
     name = "configmap-jobmanager-api"
+    namespace = kubernetes_namespace.fiap_jobmanager.metadata.0.name
     labels = {
       "app"       = "jobmanager-api"
       "terraform" = true
@@ -122,19 +134,18 @@ resource "kubernetes_config_map_v1" "config_map_api" {
   data = {
     "ASPNETCORE_ENVIRONMENT"               = "Development"
     "Serilog__WriteTo__2__Args__serverUrl" = "http://api-internal.fiap-log.svc.cluster.local"
-    "RedisSettings__Host"                  = "redis"
-    "RedisSettings__Port"                  = 6379
     "JwtOptions__Issuer"                   = local.jwt_issuer
     "JwtOptions__Audience"                 = local.jwt_aud
     "JwtOptions__ExpirationSeconds"        = 3600
     "JwtOptions__UseAccessToken"           = true
-    "VideoReceivedConfig__QueueUrl"        = aws_sqs_queue.received_videos.url
+    "VideoReceivedSettings__QueueUrl"        = aws_sqs_queue.received_videos.url
   }
 }
 
 resource "kubernetes_secret" "secret_api" {
   metadata {
     name = "secret-jobmanager-api"
+    namespace = kubernetes_namespace.fiap_jobmanager.metadata.0.name
     labels = {
       app         = "api-pod"
       "terraform" = true
@@ -156,6 +167,7 @@ resource "kubernetes_secret" "secret_api" {
 resource "kubernetes_service" "jobmanager-api-svc" {
   metadata {
     name      = "api-internal"
+    namespace = kubernetes_namespace.fiap_jobmanager.metadata.0.name
     annotations = {
       "service.beta.kubernetes.io/aws-load-balancer-type"   = "nlb"
       "service.beta.kubernetes.io/aws-load-balancer-scheme" = "internal"
@@ -165,7 +177,7 @@ resource "kubernetes_service" "jobmanager-api-svc" {
     port {
       port        = 80
       target_port = 8080
-      node_port   = 30007
+      node_port   = 30009
       protocol    = "TCP"
     }
     type = "LoadBalancer"
@@ -175,119 +187,121 @@ resource "kubernetes_service" "jobmanager-api-svc" {
   }
 }
 
-# resource "kubernetes_deployment" "deployment_production_api" {
-#   depends_on = [
-#     kubernetes_secret.secret_api,
-#     kubernetes_config_map_v1.config_map_api
-#   ]
+resource "kubernetes_deployment" "deployment_jobmanager_api" {
+  depends_on = [
+    kubernetes_secret.secret_api,
+    kubernetes_config_map_v1.config_map_api
+  ]
 
-#   metadata {
-#     name      = "deployment-jobmanager-api"
-#     labels = {
-#       app         = "jobmanager-api"
-#       "terraform" = true
-#     }
-#   }
-#   spec {
-#     replicas = 1
-#     selector {
-#       match_labels = {
-#         app = "jobmanager-api"
-#       }
-#     }
-#     template {
-#       metadata {
-#         name = "pod-jobmanager-api"
-#         labels = {
-#           app         = "jobmanager-api"
-#           "terraform" = true
-#         }
-#       }
-#       spec {
-#         automount_service_account_token = false
-#         container {
-#           name  = "jobmanager-api-container"
-#           image = local.docker_image
-#           port {
-#             name           = "liveness-port"
-#             container_port = 8080
-#           }
-#           port {
-#             container_port = 80
-#           }
+  metadata {
+    name      = "deployment-jobmanager-api"
+    namespace = kubernetes_namespace.fiap_jobmanager.metadata.0.name
+    labels = {
+      app         = "jobmanager-api"
+      "terraform" = true
+    }
+  }
+  spec {
+    replicas = 1
+    selector {
+      match_labels = {
+        app = "jobmanager-api"
+      }
+    }
+    template {
+      metadata {
+        name = "pod-jobmanager-api"
+        labels = {
+          app         = "jobmanager-api"
+          "terraform" = true
+        }
+      }
+      spec {
+        automount_service_account_token = false
+        container {
+          name  = "jobmanager-api-container"
+          image = local.docker_image
+          port {
+            name           = "liveness-port"
+            container_port = 8080
+          }
+          port {
+            container_port = 80
+          }
 
-#           image_pull_policy = "IfNotPresent"
-#           liveness_probe {
-#             http_get {
-#               path = "/healthz"
-#               port = "liveness-port"
-#             }
-#             period_seconds        = 10
-#             failure_threshold     = 3
-#             initial_delay_seconds = 20
-#           }
-#           readiness_probe {
-#             http_get {
-#               path = "/healthz"
-#               port = "liveness-port"
-#             }
-#             period_seconds        = 10
-#             failure_threshold     = 3
-#             initial_delay_seconds = 10
-#           }
+          image_pull_policy = "IfNotPresent"
+          liveness_probe {
+            http_get {
+              path = "/healthz"
+              port = "liveness-port"
+            }
+            period_seconds        = 10
+            failure_threshold     = 3
+            initial_delay_seconds = 20
+          }
+          readiness_probe {
+            http_get {
+              path = "/healthz"
+              port = "liveness-port"
+            }
+            period_seconds        = 10
+            failure_threshold     = 3
+            initial_delay_seconds = 10
+          }
 
-#           resources {
-#             requests = {
-#               cpu    = "100m"
-#               memory = "120Mi"
-#             }
-#             limits = {
-#               cpu    = "150m"
-#               memory = "200Mi"
-#             }
-#           }
-#           env_from {
-#             config_map_ref {
-#               name = "configmap-jobmanager-api"
-#             }
-#           }
-#           env_from {
-#             secret_ref {
-#               name = "secret-jobmanager-api"
-#             }
-#           }
-#         }
-#       }
-#     }
-#   }
-# }
+          resources {
+            requests = {
+              cpu    = "100m"
+              memory = "120Mi"
+            }
+            limits = {
+              cpu    = "150m"
+              memory = "200Mi"
+            }
+          }
+          env_from {
+            config_map_ref {
+              name = "configmap-jobmanager-api"
+            }
+          }
+          env_from {
+            secret_ref {
+              name = "secret-jobmanager-api"
+            }
+          }
+        }
+      }
+    }
+  }
+}
 
-# resource "kubernetes_horizontal_pod_autoscaler_v2" "hpa_api" {
-#   metadata {
-#     name      = "hpa-jobmanager-api"
-#   }
-#   spec {
-#     max_replicas = 3
-#     min_replicas = 1
-#     scale_target_ref {
-#       api_version = "apps/v1"
-#       kind        = "Deployment"
-#       name        = "deployment-jobmanager-api"
-#     }
+resource "kubernetes_horizontal_pod_autoscaler_v2" "hpa_api" {
+  metadata {
+    name      = "hpa-jobmanager-api"
+    namespace = kubernetes_namespace.fiap_jobmanager.metadata.0.name
+  }
+  spec {
+    max_replicas = 3
+    min_replicas = 1
+    scale_target_ref {
+      api_version = "apps/v1"
+      kind        = "Deployment"
+      name        = "deployment-jobmanager-api"
+    }
 
-#     metric {
-#       type = "ContainerResource"
-#       container_resource {
-#         container = "jobmanager-api-container"
-#         name      = "cpu"
-#         target {
-#           average_utilization = 65
-#           type                = "Utilization"
-#         }
-#       }
-#     }
-#   }
-# }
+    metric {
+      type = "ContainerResource"
+      container_resource {
+        container = "jobmanager-api-container"
+        name      = "cpu"
+        target {
+          average_utilization = 65
+          type                = "Utilization"
+        }
+      }
+    }
+  }
+}
 
 
 #################################
@@ -313,7 +327,7 @@ resource "kubernetes_service" "svc_seq" {
     }
   }
   spec {
-    type = "LoadBalancer"
+    type = "NodePort"
     port {
       port      = 80
       node_port = 30008

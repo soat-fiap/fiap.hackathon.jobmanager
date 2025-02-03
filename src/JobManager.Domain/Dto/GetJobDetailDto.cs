@@ -1,3 +1,3 @@
 namespace JobManager.Domain.Dto;
 
-public record GetJobDetailDto(string UserId, string JobId);
+public record GetJobDetailDto(Guid UserId, Guid JobId);

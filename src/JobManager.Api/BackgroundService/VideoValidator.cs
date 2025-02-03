@@ -3,12 +3,19 @@ using Amazon.SQS;
 using Amazon.SQS.Model;
 using Hackathon.Video.SharedKernel;
 using Hackathon.Video.SharedKernel.Events;
+using JobManager.Controllers.Contracts;
+using MassTransit.JobService;
 using Microsoft.Extensions.Options;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace JobManager.Api.BackgroundService;
 
-public class VideoValidator(ILogger<VideoValidator> logger, IOptions<VideoReceivedSettings> settings,  IAmazonSQS sqs, IDispatcher dispatcher)
+public class VideoValidator(
+    ILogger<VideoValidator> logger,
+    IOptions<VideoReceivedSettings> settings,
+    IAmazonSQS sqs,
+    IServiceScopeFactory serviceScopeFactory,
+    IDispatcher dispatcher)
     : IHostedService, IDisposable
 {
     private Timer? _timer;
@@ -21,6 +28,10 @@ public class VideoValidator(ILogger<VideoValidator> logger, IOptions<VideoReceiv
 
     private async Task PollMessagesAsync()
     {
+        using IServiceScope scope = serviceScopeFactory.CreateScope();
+        var scopedJobManagerService =
+            scope.ServiceProvider.GetRequiredService<IJobManagerService>();
+        
         logger.LogInformation("Polling messages from SQS");
         var request = new ReceiveMessageRequest
         {
@@ -40,9 +51,11 @@ public class VideoValidator(ILogger<VideoValidator> logger, IOptions<VideoReceiv
             {
                 var x = notificationMessage.Items.First();
                 var bucket = x.VideoDetails.Bucket.Name;
-                var userId = x.VideoDetails.File.Key.Split("/")[0];
-                var jobId = x.VideoDetails.File.Key.Split("/")[1];
-                await dispatcher.PublishAsync(new VideoReceived(bucket, userId, jobId, 10));
+                var userId = Guid.Parse(x.VideoDetails.File.Key.Split("/")[0]);
+                var jobId = Guid.Parse(x.VideoDetails.File.Key.Split("/")[1]);
+
+                var job = await scopedJobManagerService.GetOneAsync(userId, jobId);
+                await dispatcher.PublishAsync(new VideoReceived(bucket, userId, jobId, job.Snapshots));
                 await sqs.DeleteMessageAsync(settings.Value.QueueUrl, message.ReceiptHandle);
             }
         }

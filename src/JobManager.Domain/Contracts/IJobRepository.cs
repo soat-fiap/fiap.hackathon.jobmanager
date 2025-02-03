@@ -8,7 +8,7 @@ public interface IJobRepository
     
     Task UpdateAsync(Job job);
     
-    Task<IReadOnlyList<Job>> GetJobsAsync(string userId);
+    Task<IReadOnlyList<Job>> GetJobsAsync(Guid userId);
 
-    Task<Job> GetJobAsync(string userId, Guid jobId);
+    Task<Job> GetJobAsync(Guid userId, Guid jobId);
 }

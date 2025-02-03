@@ -1,3 +1,3 @@
 namespace Hackathon.Video.SharedKernel.Events;
 
-public record VideoProcessingStarted(string UserId, string JobId);
+public record VideoProcessingStarted(Guid UserId, Guid JobId);
