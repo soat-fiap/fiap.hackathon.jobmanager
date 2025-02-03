@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="AspNetCore.HealthChecks.UI.Client" Version="8.0.1" />
+        <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.405.8" />
+        <PackageReference Include="AWSSDK.SQS" Version="3.7.400.30" />
+        <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
+        <PackageReference Include="Serilog.Extensions.Hosting" Version="9.0.0" />
+        <PackageReference Include="Serilog.Settings.Configuration" Version="9.0.0" />
+        <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
+        <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
+        <PackageReference Include="Serilog.Sinks.Seq" Version="9.0.0" />
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="..\.dockerignore">
+        <Link>.dockerignore</Link>
+        <DependentUpon>Dockerfile</DependentUpon>
+      </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Hackathon.Video.SharedKernel\Hackathon.Video.SharedKernel.csproj" />
+      <ProjectReference Include="..\JobManager.Application\JobManager.Application.csproj" />
+      <ProjectReference Include="..\JobManager.Cognito\JobManager.Cognito.csproj" />
+      <ProjectReference Include="..\JobManager.Controllers\JobManager.Controllers.csproj" />
+      <ProjectReference Include="..\JobManager.DynamoDB\JobManager.DynamoDB.csproj" />
+      <ProjectReference Include="..\JobManager.Email\JobManager.Email.csproj" />
+      <ProjectReference Include="..\JobManager.Masstransit\JobManager.Masstransit.csproj" />
+    </ItemGroup>
+
+</Project>
