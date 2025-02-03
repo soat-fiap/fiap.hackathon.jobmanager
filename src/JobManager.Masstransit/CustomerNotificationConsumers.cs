@@ -24,8 +24,7 @@ public class CustomerNotificationConsumers(
     
     private Task Notify(NotificationMessageDto notificationMessageDto)
     {
+        logger.LogInformation("Sending email notification to user {UserId}", notificationMessageDto.UserId);
         return useCase.ExecuteAsync(notificationMessageDto);
     }
-    
-    
 }
