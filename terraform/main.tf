@@ -132,8 +132,8 @@ resource "kubernetes_config_map_v1" "config_map_api" {
   data = {
     "ASPNETCORE_ENVIRONMENT"               = "Development"
     "Serilog__WriteTo__2__Args__serverUrl" = "http://api-internal.fiap-log.svc.cluster.local"
-    "JwtOptions__Authority"                = "https://cognito-idp.${local.aws_region}us-east-1.amazonaws.com/${local.cognito_user_pool_id}"
-    "JwtOptions__MetadataAddress"          = "https://cognito-idp.${local.aws_region}us-east-1.amazonaws.com/${local.cognito_user_pool_id}/.well-known/openid-configuration"
+    "JwtOptions__Authority"                = "https://cognito-idp.${local.aws_region}.amazonaws.com/${local.cognito_user_pool_id}"
+    "JwtOptions__MetadataAddress"          = "https://cognito-idp.${local.aws_region}.amazonaws.com/${local.cognito_user_pool_id}/.well-known/openid-configuration"
     "VideoReceivedSettings__QueueUrl"      = aws_sqs_queue.received_videos.url
     "CognitoSettings__UserPoolId"          = local.cognito_user_pool_id
   }
