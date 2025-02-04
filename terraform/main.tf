@@ -166,7 +166,7 @@ resource "kubernetes_service" "jobmanager-api-svc" {
     namespace = kubernetes_namespace.fiap_jobmanager.metadata.0.name
     annotations = {
       "service.beta.kubernetes.io/aws-load-balancer-type"   = "nlb"
-      "service.beta.kubernetes.io/aws-load-balancer-scheme" = "internal"
+      "service.beta.kubernetes.io/aws-load-balancer-scheme" = "internet-facing"
     }
   }
   spec {
