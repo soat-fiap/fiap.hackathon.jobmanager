@@ -6,6 +6,7 @@ locals {
   aws_secret_access_key = var.api_secret_access_key
   aws_region            = var.region
   jwt_signing_key       = var.jwt_signing_key
+  cognito_user_pool_id  = data.aws_cognito_user_pools.bmb_selected_user_pool.ids[0]
 }
 
 ##############################
@@ -50,17 +51,17 @@ data "aws_iam_policy_document" "queue_policy" {
     effect = "Allow"
 
     principals {
-      type        = "*"
+      type = "*"
       identifiers = ["*"]
     }
 
-    actions   = ["sqs:SendMessage"]
+    actions = ["sqs:SendMessage"]
     resources = ["arn:aws:sqs:*:*:received_videos"]
 
     condition {
       test     = "ArnEquals"
       variable = "aws:SourceArn"
-      values   = [aws_s3_bucket.video_bucket.arn]
+      values = [aws_s3_bucket.video_bucket.arn]
     }
   }
 }
@@ -86,7 +87,7 @@ resource "aws_sqs_queue_redrive_allow_policy" "received_videos_dlq_policy" {
 
   redrive_allow_policy = jsonencode({
     redrivePermission = "byQueue",
-    sourceQueueArns   = [aws_sqs_queue.received_videos.arn]
+    sourceQueueArns = [aws_sqs_queue.received_videos.arn]
   })
 }
 
@@ -95,7 +96,7 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
 
   queue {
     queue_arn     = aws_sqs_queue.received_videos.arn
-    events        = ["s3:ObjectCreated:*"]
+    events = ["s3:ObjectCreated:*"]
     filter_suffix = ".mkv"
   }
 }
@@ -124,7 +125,7 @@ resource "kubernetes_namespace" "fiap_jobmanager" {
 
 resource "kubernetes_config_map_v1" "config_map_api" {
   metadata {
-    name = "configmap-jobmanager-api"
+    name      = "configmap-jobmanager-api"
     namespace = kubernetes_namespace.fiap_jobmanager.metadata.0.name
     labels = {
       "app"       = "jobmanager-api"
@@ -134,17 +135,16 @@ resource "kubernetes_config_map_v1" "config_map_api" {
   data = {
     "ASPNETCORE_ENVIRONMENT"               = "Development"
     "Serilog__WriteTo__2__Args__serverUrl" = "http://api-internal.fiap-log.svc.cluster.local"
-    "JwtOptions__Issuer"                   = local.jwt_issuer
-    "JwtOptions__Audience"                 = local.jwt_aud
-    "JwtOptions__ExpirationSeconds"        = 3600
-    "JwtOptions__UseAccessToken"           = true
-    "VideoReceivedSettings__QueueUrl"        = aws_sqs_queue.received_videos.url
+    "JwtOptions__Authority"                = "https://cognito-idp.${local.aws_region}us-east-1.amazonaws.com/${local.cognito_user_pool_id}"
+    "JwtOptions__MetadataAddress"          = "https://cognito-idp.${local.aws_region}us-east-1.amazonaws.com/${local.cognito_user_pool_id}/.well-known/openid-configuration"
+    "VideoReceivedSettings__QueueUrl"      = aws_sqs_queue.received_videos.url
+    "CognitoSettings__UserPoolId"          = local.cognito_user_pool_id
   }
 }
 
 resource "kubernetes_secret" "secret_api" {
   metadata {
-    name = "secret-jobmanager-api"
+    name      = "secret-jobmanager-api"
     namespace = kubernetes_namespace.fiap_jobmanager.metadata.0.name
     labels = {
       app         = "api-pod"

@@ -1,12 +1,10 @@
 using System.Text.Json.Serialization;
 using Amazon.SQS;
-using Hackathon.Video.SharedKernel;
 using HealthChecks.UI.Client;
 using JobManager.Api;
+using JobManager.Api.Auth;
 using JobManager.Api.BackgroundService;
-using JobManager.Controllers.Contracts;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
-using Microsoft.Extensions.Options;
 using Serilog;
 using Serilog.Events;
 
@@ -20,14 +18,15 @@ builder.Host.UseSerilog((context, configuration) =>
         .ReadFrom.Configuration(context.Configuration)
         .Enrich.WithProperty("Environment", context.HostingEnvironment.EnvironmentName));
 
-// Add services to the container.
-
+builder.Services.AddAuthorization();
+builder.Services.ConfigureJwt(builder.Configuration);
 builder.Services.AddLogging(loggingBuilder => loggingBuilder.AddSerilog(dispose: true));
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     });
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -47,7 +46,6 @@ builder.Services.AddCors(options =>
                 .AllowAnyMethod();
         });
 });
-
 var app = builder.Build();
 
 
@@ -68,6 +66,7 @@ app.UseHealthChecks("/healthz", new HealthCheckOptions
     ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
 });
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
