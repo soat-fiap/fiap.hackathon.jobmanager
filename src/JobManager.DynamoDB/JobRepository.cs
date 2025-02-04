@@ -32,7 +32,7 @@ public class JobRepository : IJobRepository
     {
         var conditions = new List<ScanCondition>
         {
-            new ScanCondition("UserId", ScanOperator.Equal, userId)
+            new ScanCondition("UserId", ScanOperator.Equal, userId.ToString())
         };
         var search = _context.ScanAsync<Job>(conditions);
         var jobs = await search.GetRemainingAsync();
@@ -41,7 +41,7 @@ public class JobRepository : IJobRepository
 
     public async Task<Job> GetJobAsync(Guid userId, Guid jobId)
     {
-        var job = await _context.LoadAsync<Job>(userId, jobId.ToString());
+        var job = await _context.LoadAsync<Job>(userId.ToString(), jobId.ToString());
         return job;
     }
 }

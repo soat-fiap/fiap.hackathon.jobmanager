@@ -15,24 +15,6 @@ variable "eks_cluster_name" {
   default = "eks_dev_quixada"
 }
 
-variable "jwt_signing_key" {
-  type      = string
-  sensitive = true
-  default = "PkOhRwy6UtniEMo7lLWp3bADctYgnDHCTvH+2YkDeGg="
-}
-
-variable "jwt_issuer" {
-  type      = string
-  sensitive = false
-  default   = "https://localhost:7004"
-}
-
-variable "jwt_aud" {
-  type      = string
-  sensitive = false
-  default   = "https://localhost:7004"
-}
-
 variable "api_docker_image" {
   type    = string
   default = "ghcr.io/soat-fiap/fiap.hackathon.jobmanager/api:latest"
@@ -40,7 +22,7 @@ variable "api_docker_image" {
 
 variable "internal_elb_name" {
   type    = string
-  default = "kitchen-api-internal-elb"
+  default = "jobmanager-api-internal-elb"
 }
 
 variable "api_access_key_id" {
@@ -60,5 +42,5 @@ variable "api_secret_access_key" {
 variable "user_pool_name" {
   type        = string
   description = "Cognito user pool name"
-  default     = "User pool - -ylrfa"
+  default     = "bmb-users-pool-test"
 }

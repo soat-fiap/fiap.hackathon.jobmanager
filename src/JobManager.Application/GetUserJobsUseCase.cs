@@ -10,6 +10,6 @@ public class GetUserJobsUseCase(IJobRepository jobRepository) : IUseCase<Guid, I
     {
         var jobs = await jobRepository.GetJobsAsync(request);
         return jobs.Select(job =>
-            new JobDto(job.UserId, job.Id, job.Status, job.Snapshots, job.SnapshotsProcessed, job.VideoPath)).ToList();
+            new JobDto(Guid.Parse(job.UserId),Guid.Parse(job.Id), job.Status, job.Snapshots, job.SnapshotsProcessed, job.VideoPath)).ToList();
     }
 }

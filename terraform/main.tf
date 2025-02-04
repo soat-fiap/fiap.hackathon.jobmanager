@@ -1,11 +1,10 @@
 locals {
   jwt_issuer            = "https://cognito-idp.${var.region}.amazonaws.com/${data.aws_cognito_user_pools.bmb_selected_user_pool.ids[0]}"
-  jwt_aud               = var.jwt_aud
   docker_image          = var.api_docker_image
   aws_access_key        = var.api_access_key_id
   aws_secret_access_key = var.api_secret_access_key
   aws_region            = var.region
-  jwt_signing_key       = var.jwt_signing_key
+  cognito_user_pool_id  = data.aws_cognito_user_pools.bmb_selected_user_pool.ids[0]
 }
 
 ##############################
@@ -50,17 +49,17 @@ data "aws_iam_policy_document" "queue_policy" {
     effect = "Allow"
 
     principals {
-      type        = "*"
+      type = "*"
       identifiers = ["*"]
     }
 
-    actions   = ["sqs:SendMessage"]
+    actions = ["sqs:SendMessage"]
     resources = ["arn:aws:sqs:*:*:received_videos"]
 
     condition {
       test     = "ArnEquals"
       variable = "aws:SourceArn"
-      values   = [aws_s3_bucket.video_bucket.arn]
+      values = [aws_s3_bucket.video_bucket.arn]
     }
   }
 }
@@ -86,7 +85,7 @@ resource "aws_sqs_queue_redrive_allow_policy" "received_videos_dlq_policy" {
 
   redrive_allow_policy = jsonencode({
     redrivePermission = "byQueue",
-    sourceQueueArns   = [aws_sqs_queue.received_videos.arn]
+    sourceQueueArns = [aws_sqs_queue.received_videos.arn]
   })
 }
 
@@ -95,7 +94,7 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
 
   queue {
     queue_arn     = aws_sqs_queue.received_videos.arn
-    events        = ["s3:ObjectCreated:*"]
+    events = ["s3:ObjectCreated:*"]
     filter_suffix = ".mkv"
   }
 }
@@ -124,7 +123,7 @@ resource "kubernetes_namespace" "fiap_jobmanager" {
 
 resource "kubernetes_config_map_v1" "config_map_api" {
   metadata {
-    name = "configmap-jobmanager-api"
+    name      = "configmap-jobmanager-api"
     namespace = kubernetes_namespace.fiap_jobmanager.metadata.0.name
     labels = {
       "app"       = "jobmanager-api"
@@ -134,17 +133,16 @@ resource "kubernetes_config_map_v1" "config_map_api" {
   data = {
     "ASPNETCORE_ENVIRONMENT"               = "Development"
     "Serilog__WriteTo__2__Args__serverUrl" = "http://api-internal.fiap-log.svc.cluster.local"
-    "JwtOptions__Issuer"                   = local.jwt_issuer
-    "JwtOptions__Audience"                 = local.jwt_aud
-    "JwtOptions__ExpirationSeconds"        = 3600
-    "JwtOptions__UseAccessToken"           = true
-    "VideoReceivedSettings__QueueUrl"        = aws_sqs_queue.received_videos.url
+    "JwtOptions__Authority"                = "https://cognito-idp.${local.aws_region}us-east-1.amazonaws.com/${local.cognito_user_pool_id}"
+    "JwtOptions__MetadataAddress"          = "https://cognito-idp.${local.aws_region}us-east-1.amazonaws.com/${local.cognito_user_pool_id}/.well-known/openid-configuration"
+    "VideoReceivedSettings__QueueUrl"      = aws_sqs_queue.received_videos.url
+    "CognitoSettings__UserPoolId"          = local.cognito_user_pool_id
   }
 }
 
 resource "kubernetes_secret" "secret_api" {
   metadata {
-    name = "secret-jobmanager-api"
+    name      = "secret-jobmanager-api"
     namespace = kubernetes_namespace.fiap_jobmanager.metadata.0.name
     labels = {
       app         = "api-pod"
@@ -152,7 +150,6 @@ resource "kubernetes_secret" "secret_api" {
     }
   }
   data = {
-    "JwtOptions__SigningKey" = local.jwt_signing_key
     "AWS_SECRET_ACCESS_KEY"  = local.aws_secret_access_key
     "AWS_ACCESS_KEY_ID"      = local.aws_access_key
     "AWS_REGION"             = local.aws_region
@@ -297,100 +294,6 @@ resource "kubernetes_horizontal_pod_autoscaler_v2" "hpa_api" {
         target {
           average_utilization = 65
           type                = "Utilization"
-        }
-      }
-    }
-  }
-}
-
-
-#################################
-# SEQ
-#################################
-
-resource "kubernetes_namespace" "fiap_log" {
-  metadata {
-    name = "fiap-log"
-  }
-}
-
-resource "kubernetes_service" "svc_seq" {
-  metadata {
-    name      = "api-internal"
-    namespace = kubernetes_namespace.fiap_log.metadata.0.name
-    labels = {
-      "terraform" = true
-    }
-    annotations = {
-      "service.beta.kubernetes.io/aws-load-balancer-type"   = "nlb"
-      "service.beta.kubernetes.io/aws-load-balancer-scheme" = "internal"
-    }
-  }
-  spec {
-    type = "NodePort"
-    port {
-      port      = 80
-      node_port = 30008
-    }
-    selector = {
-      app = "seq"
-    }
-  }
-}
-
-resource "kubernetes_deployment" "deployment_seq" {
-  metadata {
-    name      = "deployment-seq"
-    namespace = kubernetes_namespace.fiap_log.metadata.0.name
-    labels = {
-      app         = "seq"
-      "terraform" = true
-    }
-  }
-  spec {
-    replicas = 1
-    selector {
-      match_labels = {
-        app = "seq"
-      }
-    }
-    template {
-      metadata {
-        name = "pod-seq"
-        labels = {
-          app         = "seq"
-          "terraform" = true
-        }
-      }
-      spec {
-        automount_service_account_token = false
-        container {
-          name  = "seq-container"
-          image = "datalust/seq:latest"
-          port {
-            container_port = 80
-          }
-          image_pull_policy = "IfNotPresent"
-          env {
-            name  = "ACCEPT_EULA"
-            value = "Y"
-          }
-          resources {
-            requests = {
-              cpu    = "50m"
-              memory = "120Mi"
-            }
-            limits = {
-              cpu    = "100m"
-              memory = "220Mi"
-            }
-          }
-        }
-        volume {
-          name = "dashboards-volume"
-          host_path {
-            path = "/home/docker/seq"
-          }
         }
       }
     }

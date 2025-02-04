@@ -11,12 +11,12 @@ public class CreateJobUseCase(IJobRepository jobManagerRepository) : IUseCase<Cr
     {
         var job = new Job()
         {
-            Id = Guid.NewGuid(),
-            UserId = request.UserId,
+            Id = Guid.NewGuid().ToString(),
+            UserId = request.UserId.ToString(),
             Snapshots = request.SnapshotsCount
         };
 
         await jobManagerRepository.SaveAsync(job);
-        return new JobDto(job.UserId, job.Id, job.Status, job.Snapshots, 1, string.Empty);
+        return new JobDto(Guid.Parse(job.UserId), Guid.Parse(job.Id), job.Status, job.Snapshots, 1, string.Empty);
     }
 }

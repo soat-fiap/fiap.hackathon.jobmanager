@@ -1,18 +1,20 @@
+using JobManager.Api.Auth;
 using JobManager.Api.Model;
 using JobManager.Controllers.Contracts;
 using JobManager.Domain.Dto;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace JobManager.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize]
 public class JobController : ControllerBase
 {
     private readonly IJobManagerService _jobManagerService;
     private readonly IFileUpload _fileUpload;
     private readonly ILogger<JobController> _logger;
-    private readonly Guid UserId = new("44b894e8-c0f1-70d4-be4d-732b98b8dfdc");
 
     /// <summary>
     /// Constructor
@@ -37,7 +39,7 @@ public class JobController : ControllerBase
     public async Task<ActionResult> Create(
         CreateJobRequest createJobRequest, CancellationToken cancellationToken)
     {
-        var job = await _jobManagerService.CreateJobAsync(new CreateJobDto(UserId, createJobRequest.Snapshots.Value));
+        var job = await _jobManagerService.CreateJobAsync(new CreateJobDto(HttpContext.GetUserId(), createJobRequest.Snapshots.Value));
         return Created("", job);
     }
 
@@ -49,7 +51,7 @@ public class JobController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<List<ListJobResponse>>> GetJobs(CancellationToken cancellationToken)
     {
-        var jobs = await _jobManagerService.ListJobsAsync(UserId);
+        var jobs = await _jobManagerService.ListJobsAsync(HttpContext.GetUserId());
 
         return Ok(jobs.ToListJobResponse());
     }
@@ -63,7 +65,7 @@ public class JobController : ControllerBase
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<ListJobResponse>> GetJob(Guid id, CancellationToken cancellationToken)
     {
-        var job = await _jobManagerService.GetOneAsync(UserId, id);
+        var job = await _jobManagerService.GetOneAsync(HttpContext.GetUserId(), id);
         return Ok(job.ToListJobResponse());
     }
 
@@ -76,7 +78,7 @@ public class JobController : ControllerBase
     [HttpGet("{id:guid}/upload-link")]
     public async Task<ActionResult> GetUploadLink(Guid id, CancellationToken cancellationToken)
     {
-        var job = await _jobManagerService.GetOneAsync(UserId, id);
+        var job = await _jobManagerService.GetOneAsync(HttpContext.GetUserId(), id);
         if (job is null)
             return NotFound();
 
@@ -96,7 +98,7 @@ public class JobController : ControllerBase
     [HttpGet("{id:guid}/download")]
     public async Task<ActionResult> GetDownloadLink(Guid id, CancellationToken cancellationToken)
     {
-        var job = await _jobManagerService.GetOneAsync(UserId, id);
+        var job = await _jobManagerService.GetOneAsync(HttpContext.GetUserId(), id);
         if (job is null)
             return NotFound();
 
