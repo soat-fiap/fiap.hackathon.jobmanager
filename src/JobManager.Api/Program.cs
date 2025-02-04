@@ -57,7 +57,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseSerilogRequestLogging();
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
 app.UseCors("AllowSpecificOrigins");
 
 app.UseHealthChecks("/healthz", new HealthCheckOptions
