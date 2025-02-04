@@ -1,5 +1,4 @@
 locals {
-  jwt_issuer            = "https://cognito-idp.${var.region}.amazonaws.com/${data.aws_cognito_user_pools.bmb_selected_user_pool.ids[0]}"
   docker_image          = var.api_docker_image
   aws_access_key        = var.api_access_key_id
   aws_secret_access_key = var.api_secret_access_key
