@@ -1,11 +1,9 @@
 locals {
   jwt_issuer            = "https://cognito-idp.${var.region}.amazonaws.com/${data.aws_cognito_user_pools.bmb_selected_user_pool.ids[0]}"
-  jwt_aud               = var.jwt_aud
   docker_image          = var.api_docker_image
   aws_access_key        = var.api_access_key_id
   aws_secret_access_key = var.api_secret_access_key
   aws_region            = var.region
-  jwt_signing_key       = var.jwt_signing_key
   cognito_user_pool_id  = data.aws_cognito_user_pools.bmb_selected_user_pool.ids[0]
 }
 
@@ -152,7 +150,6 @@ resource "kubernetes_secret" "secret_api" {
     }
   }
   data = {
-    "JwtOptions__SigningKey" = local.jwt_signing_key
     "AWS_SECRET_ACCESS_KEY"  = local.aws_secret_access_key
     "AWS_ACCESS_KEY_ID"      = local.aws_access_key
     "AWS_REGION"             = local.aws_region
@@ -297,100 +294,6 @@ resource "kubernetes_horizontal_pod_autoscaler_v2" "hpa_api" {
         target {
           average_utilization = 65
           type                = "Utilization"
-        }
-      }
-    }
-  }
-}
-
-
-#################################
-# SEQ
-#################################
-
-resource "kubernetes_namespace" "fiap_log" {
-  metadata {
-    name = "fiap-log"
-  }
-}
-
-resource "kubernetes_service" "svc_seq" {
-  metadata {
-    name      = "api-internal"
-    namespace = kubernetes_namespace.fiap_log.metadata.0.name
-    labels = {
-      "terraform" = true
-    }
-    annotations = {
-      "service.beta.kubernetes.io/aws-load-balancer-type"   = "nlb"
-      "service.beta.kubernetes.io/aws-load-balancer-scheme" = "internal"
-    }
-  }
-  spec {
-    type = "NodePort"
-    port {
-      port      = 80
-      node_port = 30008
-    }
-    selector = {
-      app = "seq"
-    }
-  }
-}
-
-resource "kubernetes_deployment" "deployment_seq" {
-  metadata {
-    name      = "deployment-seq"
-    namespace = kubernetes_namespace.fiap_log.metadata.0.name
-    labels = {
-      app         = "seq"
-      "terraform" = true
-    }
-  }
-  spec {
-    replicas = 1
-    selector {
-      match_labels = {
-        app = "seq"
-      }
-    }
-    template {
-      metadata {
-        name = "pod-seq"
-        labels = {
-          app         = "seq"
-          "terraform" = true
-        }
-      }
-      spec {
-        automount_service_account_token = false
-        container {
-          name  = "seq-container"
-          image = "datalust/seq:latest"
-          port {
-            container_port = 80
-          }
-          image_pull_policy = "IfNotPresent"
-          env {
-            name  = "ACCEPT_EULA"
-            value = "Y"
-          }
-          resources {
-            requests = {
-              cpu    = "50m"
-              memory = "120Mi"
-            }
-            limits = {
-              cpu    = "100m"
-              memory = "220Mi"
-            }
-          }
-        }
-        volume {
-          name = "dashboards-volume"
-          host_path {
-            path = "/home/docker/seq"
-          }
         }
       }
     }
