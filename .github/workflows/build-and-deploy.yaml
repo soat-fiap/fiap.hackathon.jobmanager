@@ -206,6 +206,7 @@ jobs:
           internal_elb_name = "${{ vars.BMB_INTERNAL_LB_NAME }}"
           api_access_key_id = "${{ secrets.AWS_API_ACCESS_KEY_ID }}"
           api_secret_access_key = "${{ secrets.AWS_API_SECRET_ACCESS_KEY }}"
+          notification_email = "${{ vars.NOTIFICATION_EMAIL }}"
           EOF
 
       - name: Upload Configuration
