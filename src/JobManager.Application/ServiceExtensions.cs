@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Hackathon.Video.SharedKernel;
-using JobManager.Domain.Contracts;
 using JobManager.Domain.Dto;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -15,7 +14,7 @@ public static class ServiceExtensions
             .AddScoped<IUseCase<CreateJobVideoUploadUrl, string>, CreateVideoUploadUrlUseCase>()
             .AddScoped<IUseCase<Guid, IReadOnlyList<JobDto>>, GetUserJobsUseCase>()
             .AddScoped<IUseCase<UpdateJobStatusDto>, UpdateJobStatusUseCase>()
-            .AddScoped<IUseCase<GetJobDetailDto, JobDto>, GetJobDetailsUseCase>()
+            .AddScoped<IUseCase<GetJobDetailDto, JobDto?>, GetJobDetailsUseCase>()
             .AddScoped<IUseCase<NotificationMessageDto>, NotifyCustomerUseCase>();
     }
 }

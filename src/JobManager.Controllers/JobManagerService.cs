@@ -7,7 +7,7 @@ namespace JobManager.Controllers;
 public class JobManagerService(
     IUseCase<CreateJobDto, JobDto> createJobUseCase,
     IUseCase<Guid, IReadOnlyList<JobDto>> getUserJobsUseCase,
-    IUseCase<GetJobDetailDto, JobDto> getJobDetailUseCase)
+    IUseCase<GetJobDetailDto, JobDto?> getJobDetailUseCase)
     : IJobManagerService
 {
     public Task<JobDto> CreateJobAsync(CreateJobDto job)
@@ -25,7 +25,7 @@ public class JobManagerService(
         return getUserJobsUseCase.ExecuteAsync(userId);
     }
 
-    public Task<JobDto> GetOneAsync(Guid userId, Guid jobId)
+    public Task<JobDto?> GetOneAsync(Guid userId, Guid jobId)
     {
         return getJobDetailUseCase.ExecuteAsync(new GetJobDetailDto(userId, jobId));
     }
