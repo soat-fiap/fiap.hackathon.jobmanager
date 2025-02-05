@@ -24,6 +24,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\src\JobManager.Application\JobManager.Application.csproj" />
+      <ProjectReference Include="..\..\src\JobManager.Controllers\JobManager.Controllers.csproj" />
     </ItemGroup>
 
 </Project>
