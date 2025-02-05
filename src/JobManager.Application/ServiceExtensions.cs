@@ -11,7 +11,6 @@ public static class ServiceExtensions
     public static void AddUseCases(this IServiceCollection serviceCollection)
     {
         serviceCollection.AddScoped<IUseCase<CreateJobDto, JobDto>, CreateJobUseCase>()
-            .AddScoped<IUseCase<CreateJobVideoUploadUrl, string>, CreateVideoUploadUrlUseCase>()
             .AddScoped<IUseCase<Guid, IReadOnlyList<JobDto>>, GetUserJobsUseCase>()
             .AddScoped<IUseCase<UpdateJobStatusDto>, UpdateJobStatusUseCase>()
             .AddScoped<IUseCase<GetJobDetailDto, JobDto?>, GetJobDetailsUseCase>()
