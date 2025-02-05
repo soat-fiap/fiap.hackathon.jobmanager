@@ -39,9 +39,8 @@ public class JobRepository : IJobRepository
         return jobs;
     }
 
-    public async Task<Job> GetJobAsync(Guid userId, Guid jobId)
+    public async Task<Job?> GetJobAsync(Guid userId, Guid jobId)
     {
-        var job = await _context.LoadAsync<Job>(userId.ToString(), jobId.ToString());
-        return job;
+        return await _context.LoadAsync<Job?>(userId.ToString(), jobId.ToString());
     }
 }

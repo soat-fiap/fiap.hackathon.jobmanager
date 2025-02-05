@@ -1,9 +1,10 @@
 locals {
-  docker_image          = var.api_docker_image
-  aws_access_key        = var.api_access_key_id
-  aws_secret_access_key = var.api_secret_access_key
-  aws_region            = var.region
-  cognito_user_pool_id  = data.aws_cognito_user_pools.bmb_selected_user_pool.ids[0]
+  docker_image              = var.api_docker_image
+  aws_access_key            = var.api_access_key_id
+  aws_secret_access_key     = var.api_secret_access_key
+  aws_region                = var.region
+  cognito_user_pool_id      = data.aws_cognito_user_pools.bmb_selected_user_pool.ids[0]
+  notification_origin_email = var.notification_email
 }
 
 ##############################
@@ -48,17 +49,17 @@ data "aws_iam_policy_document" "queue_policy" {
     effect = "Allow"
 
     principals {
-      type = "*"
+      type        = "*"
       identifiers = ["*"]
     }
 
-    actions = ["sqs:SendMessage"]
+    actions   = ["sqs:SendMessage"]
     resources = ["arn:aws:sqs:*:*:received_videos"]
 
     condition {
       test     = "ArnEquals"
       variable = "aws:SourceArn"
-      values = [aws_s3_bucket.video_bucket.arn]
+      values   = [aws_s3_bucket.video_bucket.arn]
     }
   }
 }
@@ -84,7 +85,7 @@ resource "aws_sqs_queue_redrive_allow_policy" "received_videos_dlq_policy" {
 
   redrive_allow_policy = jsonencode({
     redrivePermission = "byQueue",
-    sourceQueueArns = [aws_sqs_queue.received_videos.arn]
+    sourceQueueArns   = [aws_sqs_queue.received_videos.arn]
   })
 }
 
@@ -93,7 +94,7 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
 
   queue {
     queue_arn     = aws_sqs_queue.received_videos.arn
-    events = ["s3:ObjectCreated:*"]
+    events        = ["s3:ObjectCreated:*"]
     filter_suffix = ".mkv"
   }
 }
@@ -136,6 +137,7 @@ resource "kubernetes_config_map_v1" "config_map_api" {
     "JwtOptions__MetadataAddress"          = "https://cognito-idp.${local.aws_region}.amazonaws.com/${local.cognito_user_pool_id}/.well-known/openid-configuration"
     "VideoReceivedSettings__QueueUrl"      = aws_sqs_queue.received_videos.url
     "CognitoSettings__UserPoolId"          = local.cognito_user_pool_id
+    "EmailOptions__SenderEmail"            = local.notification_origin_email
   }
 }
 
@@ -149,9 +151,9 @@ resource "kubernetes_secret" "secret_api" {
     }
   }
   data = {
-    "AWS_SECRET_ACCESS_KEY"  = local.aws_secret_access_key
-    "AWS_ACCESS_KEY_ID"      = local.aws_access_key
-    "AWS_REGION"             = local.aws_region
+    "AWS_SECRET_ACCESS_KEY" = local.aws_secret_access_key
+    "AWS_ACCESS_KEY_ID"     = local.aws_access_key
+    "AWS_REGION"            = local.aws_region
   }
   type = "Opaque"
 }

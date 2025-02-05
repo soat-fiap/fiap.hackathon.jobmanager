@@ -24,7 +24,7 @@ public static class ServiceCollectionsExtensions
         serviceCollection.ConfigureDispatcher();
         serviceCollection.AddS3Connection();
         serviceCollection.AddEmailService();
-        serviceCollection.AddSimpleEmailServiceClient();
+        serviceCollection.AddSimpleEmailServiceClient(configuration);
         serviceCollection.ConfigureCognito();
         serviceCollection.ConfigureVideoReceivedQueue();
     }
@@ -45,8 +45,11 @@ public static class ServiceCollectionsExtensions
         services.AddScoped<IAmazonS3>(_ => new AmazonS3Client());
     }
     
-    private static void AddSimpleEmailServiceClient(this IServiceCollection services)
+    private static void AddSimpleEmailServiceClient(this IServiceCollection services,  IConfiguration configuration)
     {
         services.AddScoped<IAmazonSimpleEmailService>(_ => new AmazonSimpleEmailServiceClient());
+        services.AddOptions<EmailOptions>()
+            .Bind(configuration.GetSection("EmailOptions"))
+            .ValidateDataAnnotations();
     }
 }  

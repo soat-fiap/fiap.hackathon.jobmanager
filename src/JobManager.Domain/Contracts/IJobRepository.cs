@@ -10,5 +10,5 @@ public interface IJobRepository
     
     Task<IReadOnlyList<Job>> GetJobsAsync(Guid userId);
 
-    Task<Job> GetJobAsync(Guid userId, Guid jobId);
+    Task<Job?> GetJobAsync(Guid userId, Guid jobId);
 }

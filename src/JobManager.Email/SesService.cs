@@ -1,12 +1,12 @@
-﻿using Amazon.Runtime.Internal.Util;
-using Amazon.SimpleEmail;
+﻿using Amazon.SimpleEmail;
 using Amazon.SimpleEmail.Model;
 using JobManager.Domain.Contracts;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace JobManager.Email;
 
-public class SesService(ILogger<SesService> logger,  IAmazonSimpleEmailService sesClient) : IEmailService
+public class SesService(ILogger<SesService> logger,  IAmazonSimpleEmailService sesClient, IOptions<EmailOptions> emailOptions) : IEmailService
 {
     public async Task SendEmailAsync(string subject, string destination, string message)
     {
@@ -40,7 +40,7 @@ public class SesService(ILogger<SesService> logger,  IAmazonSimpleEmailService s
                             Data = subject
                         }
                     },
-                    Source = "atendimento@fiap.com.br"
+                    Source = emailOptions.Value.SenderEmail
                 });
         }
         catch (Exception ex)

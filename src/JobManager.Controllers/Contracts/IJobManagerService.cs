@@ -10,5 +10,5 @@ public interface IJobManagerService
     
     Task<IReadOnlyList<JobDto>> ListJobsAsync(Guid userId);
 
-    Task<JobDto> GetOneAsync(Guid userId, Guid jobId);
+    Task<JobDto?> GetOneAsync(Guid userId, Guid jobId);
 }

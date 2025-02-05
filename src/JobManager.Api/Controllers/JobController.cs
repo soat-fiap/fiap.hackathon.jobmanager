@@ -39,7 +39,8 @@ public class JobController : ControllerBase
     public async Task<ActionResult> Create(
         CreateJobRequest createJobRequest, CancellationToken cancellationToken)
     {
-        var job = await _jobManagerService.CreateJobAsync(new CreateJobDto(HttpContext.GetUserId(), createJobRequest.Snapshots.Value));
+        var job = await _jobManagerService.CreateJobAsync(new CreateJobDto(HttpContext.GetUserId(),
+            createJobRequest.Snapshots.Value));
         return Created("", job);
     }
 
@@ -66,6 +67,9 @@ public class JobController : ControllerBase
     public async Task<ActionResult<ListJobResponse>> GetJob(Guid id, CancellationToken cancellationToken)
     {
         var job = await _jobManagerService.GetOneAsync(HttpContext.GetUserId(), id);
+        if (job is null)
+            return NotFound();
+
         return Ok(job.ToListJobResponse());
     }
 

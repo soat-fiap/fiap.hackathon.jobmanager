@@ -9,6 +9,7 @@
     <ItemGroup>
       <PackageReference Include="AWSSDK.SimpleEmail" Version="3.7.402.29" />
       <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.1" />
+      <PackageReference Include="Microsoft.Extensions.Options" Version="8.0.2" />
     </ItemGroup>
 
     <ItemGroup>

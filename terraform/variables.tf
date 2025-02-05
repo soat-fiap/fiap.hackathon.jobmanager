@@ -29,18 +29,24 @@ variable "api_access_key_id" {
   type      = string
   nullable  = false
   sensitive = true
-  default = ""
+  default   = ""
 }
 
 variable "api_secret_access_key" {
   type      = string
   nullable  = false
   sensitive = true
-  default = ""
+  default   = ""
 }
 
 variable "user_pool_name" {
   type        = string
   description = "Cognito user pool name"
   default     = "bmb-users-pool-test"
+}
+
+variable "notification_email" {
+  type        = string
+  description = "Email from where notifications are sent"
+  nullable    = false
 }
