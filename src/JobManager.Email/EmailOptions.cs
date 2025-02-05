@@ -1,3 +1,6 @@
 namespace JobManager.Email;
 
-public record EmailOptions(string SenderEmail);
+public class EmailOptions
+{
+     public string SenderEmail { get; set; }
+};
