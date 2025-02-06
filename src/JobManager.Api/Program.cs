@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 using Amazon.SQS;
 using HealthChecks.UI.Client;

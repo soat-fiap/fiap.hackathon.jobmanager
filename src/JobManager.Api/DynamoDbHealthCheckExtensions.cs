@@ -37,6 +37,7 @@ public class DynamoDbTableHealthCheck(IAmazonDynamoDB dynamoDb, string tableName
     }
 }
 
+[ExcludeFromCodeCoverage]
 public static class DynamoDbHealthCheckExtensions
 {
     public static IHealthChecksBuilder AddDynamoDbHealthCheck(this IHealthChecksBuilder builder, string tableName,

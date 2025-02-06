@@ -80,17 +80,14 @@ public class JobController : ControllerBase
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Upload link</returns>
     [HttpGet("{id:guid}/upload-link")]
-    public async Task<ActionResult> GetUploadLink(Guid id, CancellationToken cancellationToken)
+    public async Task<ActionResult<UploadUrlResponse>> GetUploadLink(Guid id, CancellationToken cancellationToken)
     {
         var job = await _jobManagerService.GetOneAsync(HttpContext.GetUserId(), id);
         if (job is null)
             return NotFound();
 
         var url = await _fileUpload.CreateUploadUrl(job);
-        return Ok(new
-        {
-            uploadUrl = url
-        });
+        return Ok(new UploadUrlResponse(url));
     }
 
     /// <summary>
@@ -100,16 +97,13 @@ public class JobController : ControllerBase
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Upload link</returns>
     [HttpGet("{id:guid}/download")]
-    public async Task<ActionResult> GetDownloadLink(Guid id, CancellationToken cancellationToken)
+    public async Task<ActionResult<DownloadUrlResponse>> GetDownloadLink(Guid id, CancellationToken cancellationToken)
     {
         var job = await _jobManagerService.GetOneAsync(HttpContext.GetUserId(), id);
         if (job is null)
             return NotFound();
 
         var url = await _fileUpload.CreateDownloadUrl(job);
-        return Ok(new
-        {
-            uploadUrl = url
-        });
+        return Ok(new DownloadUrlResponse(url));
     }
 }

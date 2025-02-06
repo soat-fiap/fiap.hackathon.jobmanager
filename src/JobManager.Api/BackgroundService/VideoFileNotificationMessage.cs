@@ -1,7 +1,9 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 
 namespace JobManager.Api.BackgroundService;
 
+[ExcludeFromCodeCoverage]
 public class VideoFileNotificationMessage
 {
     [JsonPropertyName("Records")] 

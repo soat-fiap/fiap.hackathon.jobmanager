@@ -9,6 +9,10 @@ public class UpdateJobStatusUseCase(IJobRepository jobRepository) : IUseCase<Upd
     public async Task ExecuteAsync(UpdateJobStatusDto request)
     {
         var job = await jobRepository.GetJobAsync(request.UserId, request.JobId);
+        if(job is null)
+        {
+            throw new Exception("Job not found");
+        }
         job.SetStatus(request.Status);
 
         await jobRepository.UpdateAsync(job);
