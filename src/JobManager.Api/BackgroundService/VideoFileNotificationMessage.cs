@@ -10,18 +10,21 @@ public class VideoFileNotificationMessage
     public Record[] Items { get; set; }
 }
 
+[ExcludeFromCodeCoverage]
 public class Record
 {
     [JsonPropertyName("s3")]
     public S3 VideoDetails { get; set; }
 }
 
+[ExcludeFromCodeCoverage]
 public class S3
 {
     [JsonPropertyName("bucket")] public Bucket Bucket { get; set; }
     [JsonPropertyName("object")] public VideoObject File { get; set; }
 }
 
+[ExcludeFromCodeCoverage]
 public class Bucket
 {
     [JsonPropertyName("name")] 
@@ -31,6 +34,7 @@ public class Bucket
     public string Arn { get; set; }
 }
 
+[ExcludeFromCodeCoverage]
 public class VideoObject
 {
     [JsonPropertyName("key")] 
