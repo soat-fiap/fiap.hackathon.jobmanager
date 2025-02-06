@@ -1,8 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace JobManager.Cognito;
 
 /// <summary>
 /// Cognito User Pool settings
 /// </summary>
+[ExcludeFromCodeCoverage]
 public class CognitoSettings
 {
     /// <summary>

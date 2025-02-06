@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Hackathon.Video.SharedKernel;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
@@ -5,6 +6,7 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace JobManager.Masstransit;
 
+[ExcludeFromCodeCoverage]
 public static class ServiceExtensions
 {
     public static void ConfigureDispatcher(this IServiceCollection services)

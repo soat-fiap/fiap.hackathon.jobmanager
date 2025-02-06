@@ -23,9 +23,12 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\src\JobManager.Api\JobManager.Api.csproj" />
       <ProjectReference Include="..\..\src\JobManager.Application\JobManager.Application.csproj" />
+      <ProjectReference Include="..\..\src\JobManager.Cognito\JobManager.Cognito.csproj" />
       <ProjectReference Include="..\..\src\JobManager.Controllers\JobManager.Controllers.csproj" />
       <ProjectReference Include="..\..\src\JobManager.Email\JobManager.Email.csproj" />
+      <ProjectReference Include="..\..\src\JobManager.Masstransit\JobManager.Masstransit.csproj" />
     </ItemGroup>
 
 </Project>
